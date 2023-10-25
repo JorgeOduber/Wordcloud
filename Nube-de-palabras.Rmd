@@ -1,0 +1,70 @@
+---
+title: "Nube de palabras"
+author: "Jorge Oduber"
+date: "2023-10-24"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tm)
+library(wordcloud2)
+library(wordcloud)
+library(wesanderson)
+library(RColorBrewer)
+library(NLP)
+library(mice)
+install.packages("mice")
+```
+
+```{r}
+Reviews <- read.csv("C:\\Users\\USUARIO\\OneDrive\\Escritorio\\Portfolio\\Nube de palabras\\Reviews.csv")
+print(head(Reviews))
+Reviews
+```
+
+```{r}
+print(head(Reviews))
+word <- as.character(Reviews$Summary)
+word.corpus <- Corpus(VectorSource(word))
+```
+
+```{r}
+word.corpus <- word.corpus %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(stripWhitespace) %>%
+  tm_map(tolower) %>%
+  tm_map(removeWords,stopwords("english")) 
+```
+
+```{r}
+word.corpus <- tm_map(word.corpus,stemDocument) 
+word.count <- as.matrix(TermDocumentMatrix(word.corpus))
+word.frec <- sort(rowSums(word.count),decreasing=TRUE)
+```
+
+```{r}
+# Primera nube de palabras
+head(word.frec)
+wordcloud(words = names(word.frec), freq = word.frec, scale = c(3,0.5), 
+          max.words = 100)   
+```
+
+```{r}
+# Optimizando la nube de palabras
+
+word.frec <- sort(word.frec, decreasing = TRUE)
+wordcloud_data <- data.frame(word = names(word.frec), freq = word.frec)
+
+library(wordcloud2)
+wordcloud2(data = wordcloud_data, size = 0.5, color = "random-dark", 
+           shape = "circle", rotateRatio = 0.5)
+```
+
